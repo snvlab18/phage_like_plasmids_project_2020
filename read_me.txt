@@ -118,10 +118,11 @@ Supplementary Table S1
 Summary for Table 1
 4_2_prepare_table_about_major_replicons.py
 
-Supplementary Table S2
-4_3_TableS2_lists_of_ARGs.py
- - remove overlapping ARGs from the report
-Сolor the Table S2 manually
+Supplementary Table S3
+4_3_TableS3_lists_of_ARGs.py
+    - remove overlapping ARGs from the report
+ 
+Сolor the Table S3 manually
 
 
 
@@ -215,7 +216,7 @@ expand the working database (as in the Step 3)
     
 Process svg, save jpg
 
-Prepare Supplementary Table S3
+Prepare Supplementary Table S2
 9_2_PLP_prepare_TableS2.py
 
 
