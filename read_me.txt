@@ -121,7 +121,7 @@ Summary for Table 1
 Supplementary Table S2
 4_3_TableS2_lists_of_ARGs.py
  - remove overlapping ARGs from the report
- - color the table manually
+Сolor the Table S2 manually
 
 
 
@@ -208,12 +208,15 @@ save fasta files with all original fasta files in these project, annotate newly 
 
 expand the working database (as in the Step 3)
 
-9_check_seqs_wirh_PLP_replicons.py
+9_1_distribution_of_PLP_replicons.py
     - subcluster all sequences with the PLP-related relicons per group (grouped/ungrouped, complete/not, chromosome/not)
     - draw plots
     - save svg
     
 Process svg, save jpg
+
+Prepare Supplementary Table S3
+9_2_PLP_prepare_TableS2.py
 
 
 
