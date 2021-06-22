@@ -60,7 +60,6 @@ blast_null = main + 'Charts/genbank_show/blast_null.txt'
 blast_null = ''
         
 #collect_species
-table = 'Phage_like_plasmids_SSU5_P1_D6_8Sep20'
 table = 'Phage_like_plasmids_SSU5_P1_D6_12Nov20'
 
 database = f'{main}{table}.sqlite3'
@@ -86,14 +85,14 @@ clusters = []
 if 1:
     Inc_types = {'D6': ['D6_putative_replicon', 'other'], 'P1': ['IncY_1__K02380', 'p0111_1__AP010962'], 'SSU5': ['IncFIB_pHCM2_1__AL513384', 'IncFIB_pKPHS1_1__CP003223', 'IncFIB_H89-PhagePlasmid_1__HG530657', 'IncFIB_pLF82-PhagePlasmid_1__CU638872', 'other']}
     
-    proj = 'SSU5'
+    proj = 'D6'
     order = [c[0] for c in collect_data if c[0] in c[3] and proj in c[3]]
     upd_names = {order[0]: proj + '_1_' + order[0]}
     
     #SSU5: [3:], [2:3], [1:2] :50/ 50:, [:1] :50/ 50:;
     #P1: [:1] :50/ 50:, [1:]
     #D6: [:]
-    for rep in Inc_types[proj][3:]:
+    for rep in Inc_types[proj][:]:
         clusters.append(rep)
         add = [c for c in collect_data if c[0] not in c[3] and proj in c[3] and rep == c[-1]]
         add.sort(key = lambda x: (int(x[-2])))
@@ -118,8 +117,8 @@ if 0:
     
     
     #D6
-    # proj = 'D6_replicons'
-    # order = ['MF356679', 'AP018804', 'CP042620']
+    proj = 'D6_replicons'
+    order = ['MF356679', 'AP018804', 'CP042620']
     
     # proj = 'D6_CP055609'
     # order = ['MF356679', 'CP055609']
@@ -136,9 +135,9 @@ if 0:
     
     
     #SSU5
-    proj = 'SSU5_Ypestis'
-    order= ['JQ965645', 'AL117211', 'CP000670', 'CP045155', 'CP033694']
-    order = ['JQ965645', 'CP001587', 'AL117211', 'CP015119', 'CP000900', 'CP009714', 'CP006807']
+    # proj = 'SSU5_Ypestis'
+    # order= ['JQ965645', 'AL117211', 'CP000670', 'CP045155', 'CP033694']
+    # order = ['JQ965645', 'CP001587', 'AL117211', 'CP015119', 'CP000900', 'CP009714', 'CP006807']
         
     # proj = 'SSU5_various_replicons'
     # order = ['JQ965645', 'CP040567', 'CP056704', 'CP050499', 'CP029421']

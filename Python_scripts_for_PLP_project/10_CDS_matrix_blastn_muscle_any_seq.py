@@ -102,7 +102,7 @@ rcParams['font.sans-serif'] = ['Arial']
 plt.rcParams["figure.figsize"] = proj_params[proj]
 sns.set_context("paper")
 sns.set_style('whitegrid')
-
+plt.rc('legend', fontsize='24', title_fontsize='32')
 
 fasta = plas_fold + 'fasta/'
 fasta = glob.glob(fasta + '*')
@@ -132,7 +132,7 @@ for row in cur.execute(task):
         inc_for_num = inc
         if not inc:
             if 'D6_putative_replicon_orf42' in d6_orf42:
-                inc = 'D6_repB'
+                inc = 'D6_orf42'
             else:
                 found = [n[1] for n in new_reps if gid == n[0]]
                 if found:
@@ -154,7 +154,7 @@ for row in cur.execute(task):
         data.append([num, inc, genome, res, gid, host, major_var])
         
 data.sort(key = lambda x: (x[0], x[5]))
-# print(*data[-10:], sep = '\n')
+print(*data[-10:], sep = '\n')
 
 
 
@@ -314,7 +314,7 @@ for ref in list_cdss[:]:
         plt.show()
         
         
-    if 1:
+    if 0:
         print('draw a clustermap')
         df = pd.read_csv(heatmap, index_col = 'Index', sep = '\t')
         print(df.head())
@@ -374,22 +374,23 @@ for ref in list_cdss[:]:
         
         
         #concise list of species for the legend
-        species_lut = {'Escherichia sp.': 'red'} 
-        species_lut['Escherichia phage'] = 'red'
+        species_lut = {'Escherichia sp.': ['red', ['Escherichia coli','Escherichia marmotae', 'Escherichia fergusonii', 'Escherichia albertii']]} 
+        species_lut['Shigella sonnei'] = ['red', []]
+        species_lut['Escherichia phage'] = ['red', []]
         
-        species_lut['Klebsiella sp.'] = 'blue'
-        species_lut['Klebsiella phage'] = 'blue'
+        species_lut['Klebsiella sp.'] = ['blue', ['Klebsiella pneumoniae','Klebsiella grimontii','Klebsiella variicola','Klebsiella oxytoca']]
+        species_lut['Klebsiella phage'] = ['blue', []]
         
-        species_lut['Salmonella sp.'] = 'green'
-        species_lut['Salmonella phage'] = 'green'
+        species_lut['Salmonella sp.'] = ['green', ['Salmonella enterica']]
+        species_lut['Salmonella phage'] = ['green', []]
         
-        species_lut['Yersinia pestis'] = 'yellow'
-        species_lut['Citrobacter sp.'] = 'aqua'
-        species_lut['Enterobacter sp.'] = 'maroon'
-        species_lut['Cronobacter sakazakii'] = 'purple'
-        species_lut['Kluyvera cryocrescens'] = 'pink'
-        species_lut['uncultured bacterium'] = 'grey'
-        species_lut['Enterobacteria phage'] = 'orange'
+        species_lut['Yersinia pestis'] = ['yellow', []]
+        species_lut['Citrobacter sp.'] = ['aqua', ['Citrobacter freundii']]
+        species_lut['Enterobacter sp.'] = ['maroon', ['Enterobacter cloacae','Enterobacter hormaechei']]
+        species_lut['Cronobacter sakazakii'] = ['purple', []]
+        species_lut['Kluyvera cryocrescens'] = ['pink', []]
+        species_lut['uncultured bacterium'] = ['grey', []]
+        species_lut['Enterobacteria phage'] = ['orange', []]
         
         
         
@@ -407,7 +408,8 @@ for ref in list_cdss[:]:
         major_vars_colors = major_vars.map(major_vars_lut)
         
         node_colors = pd.DataFrame(species_colors).join(pd.DataFrame(rep_colors)).join(pd.DataFrame(major_vars_colors))
-
+        node_colors = pd.DataFrame(rep_colors).join(pd.DataFrame(species_colors))
+        
         #draw
         #col_colors=rep_colors, 
         #row_linkage=
@@ -417,6 +419,7 @@ for ref in list_cdss[:]:
                               robust=my_robust, col_cluster = False, row_colors=node_colors, cmap="coolwarm", 
                               cbar_pos=(0, .8, .03, .2), vmin=0, vmax=100)
         
+        
         #specify linewidth in Seaborn's clustermap dendrograms
         for a in plot.ax_row_dendrogram.collections:
             a.set_linewidth(4)
@@ -425,138 +428,25 @@ for ref in list_cdss[:]:
         for label in replicons_lut:
             plot.ax_col_dendrogram.bar(0, 0, color=replicons_lut[label], label=label, linewidth=0);
         l1 = plot.ax_col_dendrogram.legend(title='Major replicons', loc="upper left", 
-                                           bbox_to_anchor=(0.85, 0.9), bbox_transform=gcf().transFigure, frameon = False)
+                                           bbox_to_anchor=(0.85, 1), bbox_transform=gcf().transFigure, frameon = False)
         
         #add legend for species
+        shorten_list = set(list(species))
+        print(shorten_list)
+        save = []
         for label in species_lut:
-            plot.ax_row_dendrogram.bar(0, 0, color=species_lut[label], label=label, linewidth=0);
+            check = [label] + species_lut[label][1]
+            check = [c for c in check if c in shorten_list]
+            save += check
+            if check:
+                plot.ax_row_dendrogram.bar(0, 0, color=species_lut[label][0], label=label, linewidth=0);
         l2 = plot.ax_row_dendrogram.legend(title='Host species', loc="upper left", ncol=2, 
-                                           bbox_to_anchor=(0.85, 0.85), bbox_transform=gcf().transFigure, frameon = False)
-
-        plot.savefig(heatmap[:-4] + '_rep.png', dpi=300, format='png')
-
-    
-    if 0:
-        print('select common genes, muscle and concatenate')
-        table = open(heatmap).read().strip().split('\n')
-        table = [t.split('\t')[1:] for t in table]
-        size = len(table) - 1
-        header = table[0]
-        good = []
-        not_good = 0
+                                           bbox_to_anchor=(0.85, 0.9), bbox_transform=gcf().transFigure, frameon = False)
         
-        similarity_th = 40
-        for i in range(len(header)):
-            gene = header[i]
-            values = [abs(float(t[i])) for t in table[1:]]
-            values = [v for v in values if v < similarity_th]
-            if not values:
-                good.append(gene)
-            else:
-                not_good += 1
-        print(len(good), *good[:3])
-        print(not_good)
         
-        align_fold = plas_fold + 'muscle_CDSs/'
+        if [s for s in shorten_list if s not in save]:
+            print('LOST SPECIES!!!', [s for s in shorten_list if s not in save])
+        else:
+            print('ALL SPECIES WERE FOUND))')
         
-        great = 0
-        dupl = 0
-        
-        if 1:
-            myf.run('rm -r ' + align_fold[:-1])
-            myf.run('mkdir ' + align_fold[:-1])
-            
-            for gene in good:
-                print('!!!', gene, '\n!!!\n')
-                gene_name = gene.replace('(', '').replace(')', '').replace('..','_')
-                muscle_in = align_fold + gene_name + '.fasta'
-                muscle_collect = []
-                
-                duplicate = []
-                for entry in data:
-                    gid = entry[3]
-                    res = cds + gid + '.txt'
-                    res = open(res).read().strip().split('\n')
-                    res = [r.split('\t') for r in res]
-                    res_c = [r for r in res if r[0] == name_dict[gene] and (int(r[3])-10000 >= int(r[10]) or int(r[3])-10000 >= int(r[11])) ]
-                    
-                    res_c.sort(key = lambda x: float(x[-2]), reverse = True)
-                    best = res_c[0]
-                    if len(res_c) > 1:
-                        second = res_c[1]
-                    else:
-                        second = [0 for b in best]
-                        
-                    if float(best[-2])/2 > float(second[-2]) or '1' in second[10:12] or second[3] in second[10:12]:
-                        sseq = best[-1]
-                        add = f'>{gid}\n{sseq}\n'
-                        muscle_collect.append(add)
-                    else:
-                        duplicate.append([gid, gene, best[-2], second[-2]])
-                        print('Dup!!', gid, gene, best, second, '--', sep = '\n')
-                        if '1' in second[10:12]:
-                            print('weird')
-                    
-                if not duplicate:
-                    with open(muscle_in, 'w') as fh:
-                        fh.write(''.join(muscle_collect))
-                    great += 1
-                else:
-                    dupl += 1
-                    
-            print(great, dupl)
-        
-            for muscle_in in glob.glob(align_fold + '*'):
-                muscle_out = muscle_in[:-6] + '_muscle.fasta'
-                
-                cmd = f'muscle -in {muscle_in} -out {muscle_out}'
-                myf.run(cmd)
-                
-            
-        align = [g for g in glob.glob(align_fold + '*') if '_muscle.fasta' in g]
-        great = len(align)
-        print(len(align))
-        
-        concat = {}
-        total = 0
-        for file_name in align[:]:
-            file = open(file_name).read().strip().split('>')[1:]
-            sizes ={}
-            for seq in file:
-                seq = seq.split('\n')
-                name = seq[0]
-                
-                if name not in concat:
-                    concat[name] = ''
-                    
-                dna = ''.join(seq[1:])
-                if len(dna) not in sizes:
-                    sizes[len(dna)] = []
-                sizes[len(dna)].append(name)
-                concat[name] += dna
-                
-            print(file_name, len(sizes))
-            for s in sizes:
-                total += s
-                print(s, len(sizes[s]))
-            print('--\n')
-        
-        print(total, len(concat))
-        
-        answer = []
-        check = []
-        for c in concat:
-            dna = concat[c]
-            # print(c, len(dna), dna[:10])
-            check.append(len(dna))
-            
-            dna = [dna[i*60:(i+1)*60] for i in range(int(len(dna)/60)+1)]
-            dna=[d for d in dna if d]
-            dna = '\n'.join(dna)
-            answer.append(f'>{c}\n{dna}\n')
-            
-        with open(plas_fold + f'{proj}_concat_{great}_CDSs_th{similarity_th}.fasta', 'w') as fh:
-            fh.write(''.join(answer))
-        
-        check = list(set(check))
-        print('check', check)
+        plot.savefig(heatmap[:-4] + '_rep1.png', dpi=300, format='png')

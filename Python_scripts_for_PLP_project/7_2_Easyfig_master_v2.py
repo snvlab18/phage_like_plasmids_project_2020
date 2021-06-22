@@ -14,7 +14,7 @@ import sqlite3
 import glob
 import re
 import PLP_main_functions as myf
-import FIB_annotate
+import main_annotate
 
 
 def generate_gb(new_gb, name, host, size, feats, dna, easyfig=False):
@@ -156,12 +156,13 @@ clusters.sort()
 
 # clusters = [c for c in clusters if 'ARG_extra' not in c and 'mcr' not in c and 'rotated_ARG' not in c and 'problem' not in c]
 # clusters = [c for c in clusters if 'pHCM' in c]
-clusters = [c for c in clusters if 'rotated_ARG' in c]
+# clusters = [c for c in clusters if 'rotated_ARG' in c]
+clusters = [c for c in clusters if 'other' in c]
 
 tree_fold = cluster_fold + 'iqtree/'
 
 viz_fold = cluster_fold + 'Viz_GenBank/'
-viz_fold = cluster_fold + 'Viz_extra_matches/'
+# viz_fold = cluster_fold + 'Viz_extra_matches/'
 myf.mkdir(viz_fold)
 
 #improve vfdb and oriTDB feat names!  
@@ -176,7 +177,7 @@ for oritdb in glob.glob(main + 'db/oriTDB/*') + [main + 'db/VFDB_setB_nt.fsa']:
     oritdb_dict = dict(zip(genes, gene_names))
     expand_feats[oritdb_name] = oritdb_dict
     
-expand_feats['D6_putative_replicon_orf42'] = {'D6_putative_replicon_orf42_c45699_46596': 'D6_repB'}
+expand_feats['D6_putative_replicon_orf42'] = {'D6_putative_replicon_orf42_c45699_46596': 'D6_orf42'}
     
 for e in expand_feats:    
     print(e, len(expand_feats[e]))
@@ -220,15 +221,17 @@ for clust in clusters[:]:
     db = [f for f in db if '.fsa' in f]
     
     
-    # print('show files in my local db', *db, '--\n\n', sep = '\n')
+    print('show files in my local db', *db, '--\n\n', sep = '\n')
     
     count = 0
     # print(*plasmids)
+    
+    plasmids = [p for p in plasmids if 'CP042620' in p] + [p for p in plasmids if 'CP042620' not in p]
     for query in plasmids:
         count += 1
         if rerun and (query.split('/')[-1].split('_')[0] in with_args or not_only_ARG_encoding):
             print(query, count, str(round(100*count/len(plasmids), 1))+'%')
-            FIB_annotate.annotate_query(query, clust, db, annotate, rerun=rerun)
+            main_annotate.annotate_query(query, clust, db, annotate, rerun=rerun)
             
             print('--\n\n')
         
